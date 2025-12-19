@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">        
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Tasker</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCmhy_PecIkOUp0FzFZNwpg7JtbrWkee7k",
+            authDomain: "smart-tasker-27bc2.firebaseapp.com",
+            projectId: "smart-tasker-27bc2",
+            storageBucket: "smart-tasker-27bc2.firebasestorage.app",
+            messagingSenderId: "326716262214",
+            appId: "1:326716262214:web:c6048f85de6cfe8c524747",
+            measurementId: "G-QCFQMQWP0R"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        window.auth = getAuth(app);
+        window.db = getFirestore(app);
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Smart Tasker</h1>
+        <p>Простой сайт для ввода мыслей и автоматического превращения их в задачи.</p>
+        <div id="auth-section">
+            <div id="user-info" style="display: none;">
+                <span id="user-email"></span>
+                <button id="logout-btn">Выйти</button>
+            </div>
+            <div id="auth-form">
+                <input type="email" id="email" placeholder="Email">
+                <input type="password" id="password" placeholder="Пароль">
+                <button id="login-btn">Войти</button>
+                <button id="register-btn">Регистрация</button>
+            </div>
+        </div>
+    </header>
+    <main id="main-content" style="display: none;">
+        <section id="input-section">
+            <h2>Введите вашу мысль</h2>
+            <textarea id="thought-input" placeholder="Напишите здесь вашу мысль..."></textarea>
+            <button id="submit-button">Создать задачу</button>
+        </section>
+        <section id="task-section">
+            <h2>Ваши задачи</h2>
+            <ul id="task-list"></ul>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Smart Tasker</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
