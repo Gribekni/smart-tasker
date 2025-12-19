@@ -27,6 +27,8 @@ header {
 #auth-form input {
     padding: 0.5rem;
     width: 200px;
+    display: block;
+    margin: 0 auto;
 }
 
 #auth-form button {
@@ -35,6 +37,8 @@ header {
     color: white;
     border: none;
     cursor: pointer;
+    display: block;
+    margin: 0 auto;
 }
 
 #auth-form button:hover {

@@ -5,7 +5,6 @@
 */
 
 let tasks = [];
-let currentUser = null;
 
 // Функции аутентификации
 function showAuthForm() {
@@ -53,48 +52,24 @@ window.auth.onAuthStateChanged(user => {
     if (user) {
         currentUser = user;
         document.getElementById('user-email').textContent = user.email;
-        showMainContent();
         loadTasks();
+        showMainContent();
     } else {
         currentUser = null;
         showAuthForm();
     }
 });
 
-async function loadTasks() {
-    if (!currentUser) return;
-    try {
-        const querySnapshot = await window.db.collection('tasks').where('userId', '==', currentUser.uid).get();
-        tasks = [];
-        querySnapshot.forEach(doc => {
-            tasks.push({ id: doc.id, ...doc.data() });
-        });
-        renderTasks();
-        console.log('Tasks loaded:', tasks);
-    } catch (error) {
-        console.error('Error loading tasks:', error);
-        alert('Ошибка при загрузке задач: ' + error.message);
+function loadTasks() {
+    const stored = localStorage.getItem('tasks');
+    if (stored) {
+        tasks = JSON.parse(stored);
     }
+    renderTasks();
 }
 
-async function saveTask(task) {
-    if (!currentUser) return;
-    try {
-        await window.db.collection('tasks').add({ ...task, userId: currentUser.uid });
-    } catch (error) {
-        console.error('Error saving task:', error);
-        throw error; // чтобы catch в обработчике поймал
-    }
-}
-
-async function updateTaskStatus(taskId, status) {
-    if (!currentUser) return;
-    await window.db.collection('tasks').doc(taskId).update({ status });
-}
-
-async function deleteTaskFromDB(taskId) {
-    if (!currentUser) return;
-    await window.db.collection('tasks').doc(taskId).delete();
+function saveTasks() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
 function renderTasks() {
@@ -106,10 +81,9 @@ function renderTasks() {
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.checked = task.status === 'done';
-        checkbox.addEventListener('change', async () => {
-            const newStatus = checkbox.checked ? 'done' : 'todo';
-            task.status = newStatus;
-            await updateTaskStatus(task.id, newStatus);
+        checkbox.addEventListener('change', () => {
+            task.status = checkbox.checked ? 'done' : 'todo';
+            saveTasks();
             renderTasks();
         });
 
@@ -122,9 +96,9 @@ function renderTasks() {
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Удалить';
         deleteButton.className = 'delete-btn';
-        deleteButton.addEventListener('click', async () => {
-            await deleteTaskFromDB(task.id);
+        deleteButton.addEventListener('click', () => {
             tasks = tasks.filter(t => t.id !== task.id);
+            saveTasks();
             renderTasks();
         });
 
@@ -157,36 +131,22 @@ function extractTasks(text) {
 }
 
 // При нажатии на кнопку преобразовать текст в задачи и добавить их к списку
-document.getElementById('submit-button').addEventListener('click', async () => {
-    if (!currentUser) {
-        alert('Пожалуйста, войдите в систему');
-        return;
-    }
+document.getElementById('submit-button').addEventListener('click', () => {
     const inputText = document.getElementById('thought-input').value.trim();
     if (!inputText) return;
 
     const newTaskTexts = extractTasks(inputText);
-    console.log('Extracted tasks:', newTaskTexts);
-    if (newTaskTexts.length === 0) {
-        alert('Не удалось извлечь задачи из текста');
-        return;
-    }
+    newTaskTexts.forEach((text, index) => {
+        const task = {
+            id: Date.now() + index,
+            text: text,
+            status: 'todo'
+        };
+        tasks.push(task);
+    });
 
-    try {
-        for (const text of newTaskTexts) {
-            const task = {
-                text: text,
-                status: 'todo'
-            };
-            await saveTask(task);
-            console.log('Task saved:', task);
-        }
-        await loadTasks();
-        console.log('Tasks loaded');
-    } catch (error) {
-        console.error('Error creating tasks:', error);
-        alert('Ошибка при создании задач: ' + error.message);
-    }
+    saveTasks();
+    renderTasks();
 
     // Очистить поле ввода
     document.getElementById('thought-input').value = '';
