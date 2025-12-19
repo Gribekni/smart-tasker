@@ -63,17 +63,28 @@ window.auth.onAuthStateChanged(user => {
 
 async function loadTasks() {
     if (!currentUser) return;
-    const querySnapshot = await window.db.collection('tasks').where('userId', '==', currentUser.uid).get();
-    tasks = [];
-    querySnapshot.forEach(doc => {
-        tasks.push({ id: doc.id, ...doc.data() });
-    });
-    renderTasks();
+    try {
+        const querySnapshot = await window.db.collection('tasks').where('userId', '==', currentUser.uid).get();
+        tasks = [];
+        querySnapshot.forEach(doc => {
+            tasks.push({ id: doc.id, ...doc.data() });
+        });
+        renderTasks();
+        console.log('Tasks loaded:', tasks);
+    } catch (error) {
+        console.error('Error loading tasks:', error);
+        alert('Ошибка при загрузке задач: ' + error.message);
+    }
 }
 
 async function saveTask(task) {
     if (!currentUser) return;
-    await window.db.collection('tasks').add({ ...task, userId: currentUser.uid });
+    try {
+        await window.db.collection('tasks').add({ ...task, userId: currentUser.uid });
+    } catch (error) {
+        console.error('Error saving task:', error);
+        throw error; // чтобы catch в обработчике поймал
+    }
 }
 
 async function updateTaskStatus(taskId, status) {
@@ -147,18 +158,35 @@ function extractTasks(text) {
 
 // При нажатии на кнопку преобразовать текст в задачи и добавить их к списку
 document.getElementById('submit-button').addEventListener('click', async () => {
+    if (!currentUser) {
+        alert('Пожалуйста, войдите в систему');
+        return;
+    }
     const inputText = document.getElementById('thought-input').value.trim();
     if (!inputText) return;
 
     const newTaskTexts = extractTasks(inputText);
-    for (const text of newTaskTexts) {
-        const task = {
-            text: text,
-            status: 'todo'
-        };
-        await saveTask(task);
+    console.log('Extracted tasks:', newTaskTexts);
+    if (newTaskTexts.length === 0) {
+        alert('Не удалось извлечь задачи из текста');
+        return;
     }
-    await loadTasks();
+
+    try {
+        for (const text of newTaskTexts) {
+            const task = {
+                text: text,
+                status: 'todo'
+            };
+            await saveTask(task);
+            console.log('Task saved:', task);
+        }
+        await loadTasks();
+        console.log('Tasks loaded');
+    } catch (error) {
+        console.error('Error creating tasks:', error);
+        alert('Ошибка при создании задач: ' + error.message);
+    }
 
     // Очистить поле ввода
     document.getElementById('thought-input').value = '';
