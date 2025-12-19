@@ -23,7 +23,7 @@ function showMainContent() {
 document.getElementById('login-btn').addEventListener('click', () => {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    signInWithEmailAndPassword(window.auth, email, password)
+    window.auth.signInWithEmailAndPassword(email, password)
         .then(() => {
             console.log('Вход выполнен');
         })
@@ -33,7 +33,7 @@ document.getElementById('login-btn').addEventListener('click', () => {
 document.getElementById('register-btn').addEventListener('click', () => {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    createUserWithEmailAndPassword(window.auth, email, password)
+    window.auth.createUserWithEmailAndPassword(email, password)
         .then(() => {
             console.log('Регистрация выполнена');
         })
@@ -41,7 +41,7 @@ document.getElementById('register-btn').addEventListener('click', () => {
 });
 
 document.getElementById('logout-btn').addEventListener('click', () => {
-    signOut(window.auth).then(() => {
+    window.auth.signOut().then(() => {
         tasks = [];
         renderTasks();
         showAuthForm();
@@ -49,7 +49,7 @@ document.getElementById('logout-btn').addEventListener('click', () => {
 });
 
 // Мониторинг состояния аутентификации
-onAuthStateChanged(window.auth, user => {
+window.auth.onAuthStateChanged(user => {
     if (user) {
         currentUser = user;
         document.getElementById('user-email').textContent = user.email;
@@ -63,8 +63,7 @@ onAuthStateChanged(window.auth, user => {
 
 async function loadTasks() {
     if (!currentUser) return;
-    const q = query(collection(window.db, 'tasks'), where('userId', '==', currentUser.uid));
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await window.db.collection('tasks').where('userId', '==', currentUser.uid).get();
     tasks = [];
     querySnapshot.forEach(doc => {
         tasks.push({ id: doc.id, ...doc.data() });
@@ -74,18 +73,17 @@ async function loadTasks() {
 
 async function saveTask(task) {
     if (!currentUser) return;
-    await addDoc(collection(window.db, 'tasks'), { ...task, userId: currentUser.uid });
+    await window.db.collection('tasks').add({ ...task, userId: currentUser.uid });
 }
 
 async function updateTaskStatus(taskId, status) {
     if (!currentUser) return;
-    const taskRef = doc(window.db, 'tasks', taskId);
-    await updateDoc(taskRef, { status });
+    await window.db.collection('tasks').doc(taskId).update({ status });
 }
 
 async function deleteTaskFromDB(taskId) {
     if (!currentUser) return;
-    await deleteDoc(doc(window.db, 'tasks', taskId));
+    await window.db.collection('tasks').doc(taskId).delete();
 }
 
 function renderTasks() {
@@ -159,7 +157,6 @@ document.getElementById('submit-button').addEventListener('click', async () => {
             status: 'todo'
         };
         await saveTask(task);
-        // После сохранения перезагрузить задачи
     }
     await loadTasks();
 
