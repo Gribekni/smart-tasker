@@ -2,11 +2,11 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: #fff8dc;
 }
 
 header {
-    background-color: #333;
+    background-color: #daa520;
     color: white;
     text-align: center;
     padding: 1rem;
@@ -33,7 +33,7 @@ header {
 
 #auth-form button {
     padding: 0.5rem 1rem;
-    background-color: #555;
+    background-color: #daa520;
     color: white;
     border: none;
     cursor: pointer;
@@ -42,7 +42,7 @@ header {
 }
 
 #auth-form button:hover {
-    background-color: #777;
+    background-color: #b8860b;
 }
 
 #user-info {
@@ -75,14 +75,14 @@ button {
     margin-top: 1rem;
     padding: 0.5rem 1rem;
     font-size: 1rem;
-    background-color: #333;
+    background-color: #daa520;
     color: white;
     border: none;
     cursor: pointer;
 }
 
 button:hover {
-    background-color: #555;
+    background-color: #b8860b;
 }
 
 ul {
@@ -91,7 +91,7 @@ ul {
 }
 
 li {
-    background-color: white;
+    background-color: #fffacd;
     margin-bottom: 0.5rem;
     padding: 0.5rem;
     border-radius: 4px;
@@ -125,7 +125,7 @@ li label {
 footer {
     text-align: center;
     padding: 1rem;
-    background-color: #333;
+    background-color: #daa520;
     color: white;
 }
 
